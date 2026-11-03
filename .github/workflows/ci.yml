@@ -30,8 +30,8 @@ jobs:
       - name: Validate compose file and Prometheus config
         run: |
           docker compose config -q
-          docker run --rm --entrypoint promtool -v "$PWD/deploy/prometheus:/p:ro" \
-            prom/prometheus:v2.54.1 check config /p/prometheus.yml
+          docker run --rm --entrypoint promtool -v "$PWD/deploy/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:v2.54.1 check config /etc/prometheus/prometheus.yml
       - name: Start stack
         run: docker compose up -d --build
       - name: Smoke test (health, /metrics, Prometheus targets, Grafana)
