@@ -1,0 +1,32 @@
+groups:
+  - name: network-health
+    rules:
+      - alert: TargetDown
+        expr: probe_up == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.target }} ({{ $labels.probe }}) has been failing for 2 minutes"
+
+      - alert: HighLatency
+        # Mean latency of successful probes over 5 minutes. (sum/count of the histogram)
+        expr: |
+          rate(probe_latency_seconds_sum[5m]) / rate(probe_latency_seconds_count[5m]) > 1
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.target }} ({{ $labels.probe }}) mean latency above 1s"
+
+      - alert: TlsCertExpiringSoon
+        expr: tls_cert_expiry_days < 14
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Certificate for {{ $labels.target }} expires in {{ $value | humanize }} days"
+
+      - alert: MonitorStopped
+        expr: absent(up{job="network-health-monitor"} == 1)
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "Prometheus cannot scrape the monitor"
