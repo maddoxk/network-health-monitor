@@ -1,0 +1,16 @@
+# Targets for the compose demo. The first five only touch other containers in the stack
+# (so they work offline and the CI smoke test can assert they are up); the last two go
+# out to the public internet.
+defaults:
+  interval: 5
+  timeout: 3
+  retries: 1
+
+targets:
+  - {name: prometheus-icmp, type: icmp, host: prometheus}
+  - {name: monitor-tcp, type: tcp, host: monitor, port: 8000}
+  - {name: prometheus-dns, type: dns, query: prometheus}
+  - {name: prometheus-http, type: http, url: "http://prometheus:9090/-/healthy", expect_status: 200}
+  - {name: grafana-http, type: http, url: "http://grafana:3000/api/health", expect_status: 200}
+  - {name: example-cert, type: tls, host: example.com, interval: 60, timeout: 5}
+  - {name: example-dns, type: dns, query: example.com, nameserver: 1.1.1.1, interval: 30}

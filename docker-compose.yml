@@ -1,0 +1,35 @@
+# Demo stack: monitor + Prometheus + Grafana.
+# The Grafana admin password below is a throwaway demo value; this stack is meant for localhost.
+services:
+  monitor:
+    build: .
+    volumes:
+      - ./deploy/targets.compose.yaml:/config/targets.yaml:ro
+    ports:
+      - "8000:8000"
+    # Lets the unprivileged (non-root) container open ICMP datagram sockets.
+    sysctls:
+      net.ipv4.ping_group_range: "0 2147483647"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - monitor
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
