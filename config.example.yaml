@@ -1,0 +1,33 @@
+# Example targets. Every field except name/type and the probe-specific ones is optional.
+defaults:
+  interval: 30   # seconds between probes of one target
+  timeout: 5     # seconds before a single attempt is abandoned
+  retries: 1     # extra attempts after a failure (so up to 2 attempts)
+
+max_concurrency: 20   # probes in flight at once, across all targets
+
+targets:
+  - name: cloudflare-icmp
+    type: icmp
+    host: 1.1.1.1
+
+  - name: cloudflare-dns-tcp
+    type: tcp
+    host: 1.1.1.1
+    port: 53
+
+  - name: example-dns
+    type: dns
+    query: example.com
+    record_type: A
+    nameserver: 1.1.1.1      # omit to use the system resolver
+
+  - name: example-http
+    type: http
+    url: https://example.com
+    expect_status: [200]     # omit to accept any status below 400
+
+  - name: example-cert
+    type: tls
+    host: example.com
+    port: 443

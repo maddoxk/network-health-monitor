@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "network-health-monitor"
+version = "0.1.0"
+description = "Async network probe engine with Prometheus metrics and a JSON API"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "aiohttp>=3.9",
+    "dnspython>=2.6",
+    "httpx>=0.27",
+    "icmplib>=3.0.4",
+    "prometheus-client>=0.20",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "types-PyYAML",
+]
+
+[project.scripts]
+nethealth = "nethealth.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = ["integration: needs the docker compose stack (run in CI)"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "SIM"]
+# Our probe helpers take an explicit `timeout`; that is intentional, not a missed asyncio.timeout.
+ignore = ["ASYNC109"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["icmplib", "icmplib.*"]
+ignore_missing_imports = true  # icmplib ships no type hints
+
+[[tool.mypy.overrides]]
+module = ["tests.test_probes"]
+disallow_untyped_calls = false  # dnspython exception constructors are untyped
