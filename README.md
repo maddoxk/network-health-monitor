@@ -28,6 +28,12 @@ curl localhost:8000/status
 curl localhost:8000/metrics
 ```
 
+Prebuilt image (published from tagged releases):
+
+```bash
+docker run --rm -p 8000:8000 -v "$PWD/config.example.yaml:/config/targets.yaml:ro" ghcr.io/maddoxk/network-health-monitor:latest
+```
+
 Full stack (needs Docker):
 
 ```bash
